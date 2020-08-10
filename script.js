@@ -275,7 +275,7 @@ calculateButton.addEventListener('click', (event) => {
 
           let systemSize;
 
-          const month = yearUsage === 'winter' ? 0 : 8;
+          const month = yearUsage === 'winter' ? 11 : 8;
 
           systemSize = Math.ceil((kwhPerMonth / data.outputs.monthly.fixed[month].E_m) * 1000);
 
