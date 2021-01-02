@@ -35,9 +35,35 @@ const panels = {
 };
 
 const appliances = {
-  kettle: 1200,
-  phone: 15,
-  čerpadlo: 500,
+  'mixér': 500,
+  'kávovar': 1000,
+  'umývačka riadu': 1500,
+  'mraznička': 150,
+  'chladnička - menšia': 60,
+  'chladnička - väčšia': 150,
+  'kanvica': 1200,
+  'mikrovlná rúra - moderná': 1000,
+  'mikrovlná rúra - staršia': 2400,
+  'rúra': 1200,
+  'toaster': 850,
+  'centrálna klimatizácia': 3500,
+  'ventilátor': 100,
+  'elektrický ohrievač': 2000,
+  'bojler': 3000,
+  'čerpadlo - menšie': 300,
+  'čerpadlo - väčšie': 700,
+  'sušička': 3000,
+  'práčka': 1000,
+  'žehlička': 1200,
+  'televízor - plazma': 200,
+  'televízor - LCD': 150,
+  'televízor - LED': 100,
+  'TV prijímač': 25,
+  'herná konzola': 150,
+  'laptop - klasický': 60,
+  'laptop - herný': 150,
+  'mobilný telefón - klasický': 18,
+  'mobilný telefón - výkonný': 30,
 };
 
 for (const appliance in appliances) {
@@ -95,8 +121,11 @@ const updateFields = (inputFields) => {
   }
 
   inputFields.usage.value = 1;
-  inputFields.consumption.value =
-    inputFields.power.value * inputFields.quantity.value * inputFields.usage.value;
+  inputFields.consumption.value = (
+    parseFloat(inputFields.power.value) *
+    parseFloat(inputFields.quantity.value) *
+    parseFloat(inputFields.usage.value)
+  ).toFixed(2);
   updateTotalConsumptionFields('applianceStage');
 };
 
@@ -135,7 +164,11 @@ const addRow = () => {
     if (fields.hasOwnProperty(field)) {
       fields[field].addEventListener('change', (event) => {
         if (event.target !== consumptionField) {
-          consumptionField.value = powerField.value * quantityField.value * usageField.value;
+          consumptionField.value = (
+            parseFloat(powerField.value) *
+            parseFloat(quantityField.value) *
+            parseFloat(usageField.value)
+          ).toFixed(2);
         }
         updateTotalConsumptionFields('applianceStage');
       });
@@ -171,6 +204,13 @@ whPerDayTotalField.addEventListener('change', (event) => {
   updateTotalConsumptionFields('consumptionStage');
 });
 
+const initAutocomplete = () => {
+  const locationInput = document.getElementById('location');
+  new google.maps.places.Autocomplete(locationInput);
+};
+
+google.maps.event.addDomListener(window, 'load', initAutocomplete);
+
 const getLatLong = (address) => {
   return new Promise((resolve) => {
     const geocoder = new google.maps.Geocoder();
@@ -194,18 +234,19 @@ const findNearestWattage = (requiredWattage) => {
       const element = panels[panel];
       const difference = element.wattage - requiredWattage;
 
-      if (requiredWattage <= 350) {
+      if (requiredWattage > 0 && requiredWattage <= 350) {
         morePanelsRequired = false;
         if (difference >= 0) {
           closest = element;
           break;
         }
-      } else {
+      } else if (requiredWattage > 350) {
         morePanelsRequired = true;
         break;
       }
     }
   }
+
   if (morePanelsRequired) {
     const nOf285Panels = Math.ceil(requiredWattage / 285);
     const nOf350Panels = Math.ceil(requiredWattage / 350);
@@ -221,19 +262,29 @@ const findNearestWattage = (requiredWattage) => {
   }
 };
 
-const calculateBatteryParameters = (panelConf, weekUsage, dailyConsumption) => {
-  const voltage = panelConf.quantity < 2 ? 12 : 24;
-  const capacity =
-    weekUsage === 'week'
-      ? Math.ceil((dailyConsumption * 2) / voltage)
-      : Math.ceil((dailyConsumption * 4) / voltage);
+// const calculateBatteryParameters = (panelConf, weekUsage, dailyConsumption) => {
+//   let voltage, capacityCoefficient;
 
-  console.log(capacity);
+//   if (panelConf.quantity === 1) {
+//     voltage = 12;
+//     capacityCoefficient = 1;
+//   } else if (panelConf.quantity > 1 && panelConf.quantity < 5) {
+//     voltage = 24;
+//     capacityCoefficient = 2;
+//   } else if (panelConf.quantity > 5) {
+//     voltage = 48;
+//     capacityCoefficient = 4;
+//   }
 
-  return capacity / panelConf.panel.Imppt >= 10
-    ? { capacity: capacity, voltage: voltage }
-    : { capacity: panelConf.panel.Imppt * 10, voltage: voltage };
-};
+//   const capacity =
+//     weekUsage === 'week'
+//       ? Math.ceil((dailyConsumption * 2) / voltage)
+//       : Math.ceil((dailyConsumption * 4) / voltage);
+
+//   return capacity / (panelConf.panel.Imppt * capacityCoefficient) >= 10
+//     ? { capacity: capacity, voltage: voltage }
+//     : { capacity: panelConf.panel.Imppt * capacityCoefficient * 10, voltage: voltage };
+// };
 
 const calculateButton = document.getElementById('calculateButton');
 
@@ -250,11 +301,14 @@ calculateButton.addEventListener('click', (event) => {
     const spinner = document.getElementById('spinner');
     spinner.classList.remove('d-none');
 
-    const country = document.getElementById('countrySelect').value;
+    // const country = document.getElementById('countrySelect').value;
 
-    getLatLong(`${location.value}, ${country}`).then((geolocation) => {
-      fetch(`
-            https://cors-anywhere.herokuapp.com/https://re.jrc.ec.europa.eu/api/PVcalc?outputformat=json&loss=14&peakpower=1&lat=${geolocation[0]}&lon=${geolocation[1]}&angle=${panelAngle}&aspect=${panelOrientation}`)
+    getLatLong(`${location.value}`).then((geolocation) => {
+      const corsUrl = 'https://cors-anywhere.herokuapp.com/';
+      const jrcApiUrl = 'https://re.jrc.ec.europa.eu/api/PVcalc';
+      const apiParameters = `?outputformat=json&loss=14&peakpower=1&lat=${geolocation[0]}&lon=${geolocation[1]}&angle=${panelAngle}&aspect=${panelOrientation}`;
+
+      fetch(corsUrl + jrcApiUrl + apiParameters)
         .then((response) => {
           return response.json();
         })
@@ -268,9 +322,9 @@ calculateButton.addEventListener('click', (event) => {
           const weekUsage = document.querySelector('input[name="weekUsage"]:checked').value;
           const yearUsage = document.querySelector('input[name="yearUsage"]:checked').value;
 
-          const whPerDayRequired = parseInt(
-            document.getElementById('whPerDayRequired').textContent
-          );
+          // const whPerDayRequired = parseInt(
+          //   document.getElementById('whPerDayRequired').textContent
+          // );
           const kwhPerMonth = document.getElementById('kwhPerMonth').value;
 
           let systemSize;
@@ -288,24 +342,23 @@ calculateButton.addEventListener('click', (event) => {
           const onePanelWattage = panelConfiguration.panel.wattage;
           const nOfPanles = panelConfiguration.quantity;
 
-          const batteryConfiguration = calculateBatteryParameters(
-            panelConfiguration,
-            weekUsage,
-            whPerDayRequired
-          );
+          // const batteryConfiguration = calculateBatteryParameters(
+          //   panelConfiguration,
+          //   weekUsage,
+          //   whPerDayRequired
+          // );
 
           minimumSystemSize.innerHTML = `${systemSize} Wp`;
 
           panelWattage.innerHTML = `${onePanelWattage} Wp `;
           numberOfPanels.innerHTML = `${nOfPanles}ks`;
 
-          batteryCapacity.innerHTML = `${batteryConfiguration.capacity} Ah `;
-          batteryVoltage.innerHTML = `${batteryConfiguration.voltage}V`;
-
-          const resultsArea = document.getElementById('results');
+          // batteryCapacity.innerHTML = `${batteryConfiguration.capacity} Ah `;
+          // batteryVoltage.innerHTML = `${batteryConfiguration.voltage}V`;
 
           spinner.classList.add('d-none');
 
+          const resultsArea = document.getElementById('results');
           resultsArea.classList.remove('d-none');
         });
     });

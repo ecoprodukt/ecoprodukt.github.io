@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="bootstrap.min.css">
-    <script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyClBGVONv-uwNkphm4UQ__CDzFvJGmy7SE&sensor=false"></script>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyClBGVONv-uwNkphm4UQ__CDzFvJGmy7SE&sensor=false&libraries=places"></script>
     <script src="script.js" defer></script>
     <title>Solar System Calculator</title>
 </head>
@@ -40,15 +40,7 @@
               <h4>3. Približná lokalita / adresa</h4>
               <div class="form-group">
                 <label for="location">Lokalita:</label>
-                <div class="input-group">
-                  <input type="text" class="form-control" placeholder="napr. Bojnice" id="location">
-                  <div class="input-group-append">
-                      <select id="countrySelect" class="custom-select">
-                        <option value="SK" selected>Slovensko</option>
-                        <option value="CZ">Cesko</option>
-                      </select>
-                  </div>
-                </div>
+                <input type="text" class="form-control" placeholder="napr. Bojnice" id="location">
               </div>
             </div>
             
@@ -58,11 +50,11 @@
                 <div class="col-lg-6 form-group">
                   <label>Orientácia panela:</label>
                   <select id="orientation" class="custom-select">
-                    <option value="-90">Vychod</option>
-                    <option value="-45">Juhovychod</option>
+                    <option value="-90">Východ</option>
+                    <option value="-45">Juhovýchod</option>
                     <option value="0" selected>Juh</option>
-                    <option value="45">Juhozapad</option>
-                    <option value="90">Zapad</option>
+                    <option value="45">Juhozápad</option>
+                    <option value="90">Západ</option>
                   </select>
                 </div>
                 <div class="col-lg-6 form-group">
@@ -77,16 +69,16 @@
               <h4>5. Spotrebiče</h4>
               <div class="row d-none d-lg-flex text-center">
                 <div class="col-lg-3">
-                  <label>Spotrebic:</label>
+                  <label>Spotrebič:</label>
                 </div>
                 <div class="col-lg-2">
-                  <label>Mnozstvo:</label>
+                  <label>Množstvo:</label>
                 </div>
                 <div class="col-lg">
-                  <label>Prikon:</label>
+                  <label>Príkon:</label>
                 </div>
                 <div class="col-lg-2">
-                  <label>Vyuzitie:</label>
+                  <label>Využitie:</label>
                 </div>
                 <div class="col-lg">
                   <label>Spotreba:</label>
@@ -94,18 +86,18 @@
               </div>
               <div class="row originalRow d-none form-group border-bottom">
                 <div class="col-lg-3 form-group">
-                  <label class="d-lg-none">Spotrebic:</label>
+                  <label class="d-lg-none">Spotrebič:</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <button class="btn btn-danger removeButton" type="button" disabled>X</button>
                     </div>
                     <select class="applianceSelect custom-select">
-                      <option value="" selected>Choose Appliance</option>
+                      <option value="" selected>Vyberte spotrebič</option>
                     </select>
                   </div>
                 </div>
                 <div class="col-lg-2 form-group">
-                  <label class="d-lg-none">Mnozstvo:</label>
+                  <label class="d-lg-none">Množstvo:</label>
                   <div class="input-group">
                     <input type="number" class="form-control quantity" min="1" step="1">
                     <div class="input-group-append">
@@ -114,7 +106,7 @@
                   </div>
                 </div>
                 <div class="col-lg form-group">
-                  <label class="d-lg-none">Prikon:</label>
+                  <label class="d-lg-none">Príkon:</label>
                   <div class="input-group">
                     <input type="number" class="form-control power" min="1">
                     <div class="input-group-append">
@@ -123,11 +115,11 @@
                   </div>
                 </div>
                 <div class="col-lg-2 form-group">
-                  <label class="d-lg-none">Vyuzitie:</label>
+                  <label class="d-lg-none">Využitie:</label>
                   <div class="input-group">
                     <input type="number" class="form-control usage" min="0.1" step="0.1" max="24">
                     <div class="input-group-append">
-                      <span class="input-group-text">h/den</span>
+                      <span class="input-group-text">h/deň</span>
                     </div>
                   </div>
                 </div>
@@ -136,32 +128,32 @@
                   <div class="input-group">
                     <input type="number" class="form-control consumption" min="1">
                     <div class="input-group-append">
-                      <span class="input-group-text">Wh/den</span>
+                      <span class="input-group-text">Wh/deň</span>
                     </div>
                   </div>
                 </div>
               </div>
-              <button type="button" id="addButton" class="btn btn-outline-info btn-md btn-block font-weight-bold ">Add Appliance</button>
+              <button type="button" id="addButton" class="btn btn-outline-info btn-md btn-block font-weight-bold ">Pridať spotrebič</button>
             </div>
 
             <div class="p-3 bg-light">
               <h4>6. Spotreba</h4>
               <div class="row">
                 <div class="col-lg-4 text-center form-group">
-                  <label>Denna spotreba</label>
+                  <label>Denná spotreba</label>
                   <div class="input-group">
                     <input type="number" class="form-control form-control-lg" id="whPerDayTotal" value=0 min="1">
                     <div class="input-group-append">
-                      <span class="input-group-text">Wh/den</span>
+                      <span class="input-group-text">Wh/deň</span>
                     </div>
                   </div>
                 </div>
                 <div class="col-lg-4 text-center form-group">
-                  <label>Denna potreba energie</label>
+                  <label>Denná potreba energie</label>
                   <h1 id="whPerDayRequired">0 Wh</h1>
                 </div>
                 <div class="col-lg-4 text-center form-group">
-                  <label>Mesacna potreba energie</label>
+                  <label>Mesačná potreba energie</label>
                   <div class="input-group">
                     <input type="number" class="form-control form-control-lg" id="kwhPerMonth" value=0 min="1">
                     <div class="input-group-append">
@@ -173,34 +165,34 @@
             </div>
 
             <div class="p-3">
-              <h4>7. Vypocet potrebneho systemu</h4>
-              <div class="card-group form-group text-light font-weight-bold d-none" id="results">
+              <h4>7. Výpočet potrebného systému</h4>
+              <div class="card-group form-group text-light font-weight-bold d-none text-center" id="results">
                 <div class="card bg-primary">
-                  <div class="card-header">Potrebny vykon</div>
+                  <div class="card-header">Potrebný výkon</div>
                   <div class="card-body text-center">
                     <h1 class="card-text display-4 font-weight-bold" id="minimumSystemSize">0 Wp</h1>
                   </div>
                 </div>
                 <div class="card bg-primary">
-                  <div class="card-header">Solarne panely</div>
+                  <div class="card-header">Solárne panely</div>
                   <div class="card-body text-center">
                     <h1 class="card-text display-4 font-weight-bold">
-                      <span id="panelWattage">0 Wp </span><span class="badge badge-success" id="numberOfPanels">0ks</span>
+                      <span id="panelWattage">0 Wp </span><span class="badge badge-warning" id="numberOfPanels">0ks</span>
                     </h1>
                   </div>
                 </div>
-                <div class="card bg-primary">
-                  <div class="card-header">Akumulator</div>
+                <!-- <div class="card bg-primary">
+                  <div class="card-header">Akumulátor</div>
                   <div class="card-body text-center">
                     <h1 class="card-text display-4 font-weight-bold">
                       <span id="batteryCapacity">0 Ah </span><span class="badge badge-warning" id="batteryVoltage">0V</span>
                     </h1>
                   </div>
-                </div>
+                </div> -->
               </div>
               <button type="button" class="btn btn-success btn-block btn-lg font-weight-bold" id="calculateButton">
                 <div class="d-flex align-items-center justify-content-center">
-                  <span>Calculate&nbsp;</span>
+                  <span>Vypočítať&nbsp;</span>
                   <span id="spinner" class="spinner-border spinner-border-sm d-none"></span>
                 </div>
               </button>
