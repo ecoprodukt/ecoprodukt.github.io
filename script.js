@@ -98,15 +98,16 @@ const updateTotalConsumptionFields = (stage) => {
     whPerDayTotalField.value = consumptionValues.reduce((a, b) => {
       return a + b;
     }, 0);
-  } else if (stage === 'dailyConsumptionStage') {
-    const requiredWh = Math.ceil(Math.ceil(whPerDayTotalField.value) * 1.3);
-    whPerDayRequiredField.innerHTML = `${requiredWh} Wh`;
-    kwhPerMonthField.value = ((requiredWh / 1000) * 31).toFixed(2);
   } else if (stage === 'monthlyConsumptionStage') {
     whPerDayTotalField.value = Math.ceil((parseFloat(kwhPerMonthField.value) * 1000) / 31 / 1.3);
     const requiredWh = Math.ceil(Math.ceil(whPerDayTotalField.value) * 1.3);
     whPerDayRequiredField.innerHTML = `${requiredWh} Wh`;
+    return;
   }
+
+  const requiredWh = Math.ceil(Math.ceil(whPerDayTotalField.value) * 1.3);
+  whPerDayRequiredField.innerHTML = `${requiredWh} Wh`;
+  kwhPerMonthField.value = ((requiredWh / 1000) * 31).toFixed(2);
 };
 
 const deleteRow = (button) => {
