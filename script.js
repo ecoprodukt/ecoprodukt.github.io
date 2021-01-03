@@ -90,7 +90,7 @@ checkForNegativeValues();
 const updateTotalConsumptionFields = (stage) => {
   const whPerDayTotalField = document.getElementById('whPerDayTotal');
   const whPerDayRequiredField = document.getElementById('whPerDayRequired');
-  const whPerMonthField = document.getElementById('kwhPerMonth');
+  const kwhPerMonthField = document.getElementById('kwhPerMonth');
 
   if (stage === 'applianceStage') {
     const consumptionFields = [...document.getElementsByClassName('consumption')];
@@ -98,11 +98,15 @@ const updateTotalConsumptionFields = (stage) => {
     whPerDayTotalField.value = consumptionValues.reduce((a, b) => {
       return a + b;
     }, 0);
+  } else if (stage === 'dailyConsumptionStage') {
+    const requiredWh = Math.ceil(Math.ceil(whPerDayTotalField.value) * 1.3);
+    whPerDayRequiredField.innerHTML = `${requiredWh} Wh`;
+    kwhPerMonthField.value = ((requiredWh / 1000) * 31).toFixed(2);
+  } else if (stage === 'monthlyConsumptionStage') {
+    whPerDayTotalField.value = Math.ceil((parseFloat(kwhPerMonthField.value) * 1000) / 31 / 1.3);
+    const requiredWh = Math.ceil(Math.ceil(whPerDayTotalField.value) * 1.3);
+    whPerDayRequiredField.innerHTML = `${requiredWh} Wh`;
   }
-
-  const requiredWh = Math.ceil(Math.ceil(whPerDayTotalField.value) * 1.3);
-  whPerDayRequiredField.innerHTML = `${requiredWh} Wh`;
-  whPerMonthField.value = ((requiredWh / 1000) * 31).toFixed(2);
 };
 
 const deleteRow = (button) => {
@@ -201,7 +205,13 @@ angleRange.addEventListener('input', (event) => {
 const whPerDayTotalField = document.getElementById('whPerDayTotal');
 
 whPerDayTotalField.addEventListener('change', (event) => {
-  updateTotalConsumptionFields('consumptionStage');
+  updateTotalConsumptionFields('dailyConsumptionStage');
+});
+
+const kwhPerMonthField = document.getElementById('kwhPerMonth');
+
+kwhPerMonthField.addEventListener('change', (event) => {
+  updateTotalConsumptionFields('monthlyConsumptionStage');
 });
 
 const initAutocomplete = () => {
@@ -262,29 +272,41 @@ const findNearestWattage = (requiredWattage) => {
   }
 };
 
-// const calculateBatteryParameters = (panelConf, weekUsage, dailyConsumption) => {
-//   let voltage, capacityCoefficient;
+const calculateBatteryParameters = (panelConf, weekUsage, dailyConsumption) => {
+  const LEAD_ACID_DOD_FACTOR = 2.0;
+  const LEAD_ACID_INEFFICIENCY = 1.2;
 
-//   if (panelConf.quantity === 1) {
-//     voltage = 12;
-//     capacityCoefficient = 1;
-//   } else if (panelConf.quantity > 1 && panelConf.quantity < 5) {
-//     voltage = 24;
-//     capacityCoefficient = 2;
-//   } else if (panelConf.quantity > 5) {
-//     voltage = 48;
-//     capacityCoefficient = 4;
-//   }
+  const LITHIUM_DOD_FACTOR = 1.2;
+  const LITHIUM_INEFFICIENCY = 1.05;
 
-//   const capacity =
-//     weekUsage === 'week'
-//       ? Math.ceil((dailyConsumption * 2) / voltage)
-//       : Math.ceil((dailyConsumption * 4) / voltage);
+  const batteryType = document.querySelector('input[name="batteryType"]:checked').value;
 
-//   return capacity / (panelConf.panel.Imppt * capacityCoefficient) >= 10
-//     ? { capacity: capacity, voltage: voltage }
-//     : { capacity: panelConf.panel.Imppt * capacityCoefficient * 10, voltage: voltage };
-// };
+  let voltage;
+
+  if (panelConf.quantity === 1) {
+    voltage = 12;
+  } else if (panelConf.quantity > 1 && panelConf.quantity < 5) {
+    voltage = 24;
+  } else if (panelConf.quantity > 5) {
+    voltage = 48;
+  }
+
+  let capacity;
+
+  capacity =
+    batteryType === 'lead-acid'
+      ? Math.ceil((dailyConsumption * LEAD_ACID_DOD_FACTOR * LEAD_ACID_INEFFICIENCY) / voltage)
+      : Math.ceil((dailyConsumption * LITHIUM_DOD_FACTOR * LITHIUM_INEFFICIENCY) / voltage);
+
+  // capacity = weekUsage === 'week' ? capacity : capacity * 2;
+
+  return capacity / (panelConf.panel.Imppt * Math.ceil(panelConf.quantity / 2)) >= 10
+    ? { capacity: capacity, voltage: voltage }
+    : {
+        capacity: panelConf.panel.Imppt * Math.ceil(panelConf.quantity / 2) * 10,
+        voltage: voltage,
+      };
+};
 
 const calculateButton = document.getElementById('calculateButton');
 
@@ -322,10 +344,10 @@ calculateButton.addEventListener('click', (event) => {
           const weekUsage = document.querySelector('input[name="weekUsage"]:checked').value;
           const yearUsage = document.querySelector('input[name="yearUsage"]:checked').value;
 
-          // const whPerDayRequired = parseInt(
-          //   document.getElementById('whPerDayRequired').textContent
-          // );
-          const kwhPerMonth = document.getElementById('kwhPerMonth').value;
+          const whPerDayRequired = parseInt(
+            document.getElementById('whPerDayRequired').textContent
+          );
+          const kwhPerMonth = parseFloat(document.getElementById('kwhPerMonth').value);
 
           let systemSize;
 
@@ -342,19 +364,19 @@ calculateButton.addEventListener('click', (event) => {
           const onePanelWattage = panelConfiguration.panel.wattage;
           const nOfPanles = panelConfiguration.quantity;
 
-          // const batteryConfiguration = calculateBatteryParameters(
-          //   panelConfiguration,
-          //   weekUsage,
-          //   whPerDayRequired
-          // );
+          const batteryConfiguration = calculateBatteryParameters(
+            panelConfiguration,
+            weekUsage,
+            whPerDayRequired
+          );
 
           minimumSystemSize.innerHTML = `${systemSize} Wp`;
 
           panelWattage.innerHTML = `${onePanelWattage} Wp `;
           numberOfPanels.innerHTML = `${nOfPanles}ks`;
 
-          // batteryCapacity.innerHTML = `${batteryConfiguration.capacity} Ah `;
-          // batteryVoltage.innerHTML = `${batteryConfiguration.voltage}V`;
+          batteryCapacity.innerHTML = `${batteryConfiguration.capacity} Ah `;
+          batteryVoltage.innerHTML = `${batteryConfiguration.voltage}V`;
 
           spinner.classList.add('d-none');
 

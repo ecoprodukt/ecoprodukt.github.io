@@ -64,9 +64,21 @@
                 </div>
               </div>
             </div>
+
+            <div class="p-3">
+              <h4>5. Typ akumulátora</h4>
+              <div class="form-group custom-control custom-radio">
+                <input type="radio" class="custom-control-input" name="batteryType" id="leadAcidRadio" value="lead-acid" checked>
+                <label class="custom-control-label" for="leadAcidRadio">Olovený akumulátor</label>
+              </div>
+              <div class="form-group custom-control custom-radio">
+                <input type="radio" class="custom-control-input" name="batteryType" id="lithiumRadio" value="lithium">
+                <label class="custom-control-label" for="lithiumRadio">Lítiový akumulátor</label>
+              </div>
+            </div>
           
-            <div id="appliances" class="p-3">
-              <h4>5. Spotrebiče</h4>
+            <div id="appliances" class="p-3 bg-light">
+              <h4>6. Spotrebiče</h4>
               <div class="row d-none d-lg-flex text-center">
                 <div class="col-lg-3">
                   <label>Spotrebič:</label>
@@ -136,8 +148,8 @@
               <button type="button" id="addButton" class="btn btn-outline-info btn-md btn-block font-weight-bold ">Pridať spotrebič</button>
             </div>
 
-            <div class="p-3 bg-light">
-              <h4>6. Spotreba</h4>
+            <div class="p-3">
+              <h4>7. Spotreba</h4>
               <div class="row">
                 <div class="col-lg-4 text-center form-group">
                   <label>Denná spotreba</label>
@@ -164,8 +176,8 @@
               </div>
             </div>
 
-            <div class="p-3">
-              <h4>7. Výpočet potrebného systému</h4>
+            <div class="p-3 bg-light">
+              <h4>8. Výpočet potrebného systému</h4>
               <div class="card-group form-group text-light font-weight-bold d-none text-center" id="results">
                 <div class="card bg-primary">
                   <div class="card-header">Potrebný výkon</div>
@@ -181,14 +193,14 @@
                     </h1>
                   </div>
                 </div>
-                <!-- <div class="card bg-primary">
+                <div class="card bg-primary">
                   <div class="card-header">Akumulátor</div>
                   <div class="card-body text-center">
                     <h1 class="card-text display-4 font-weight-bold">
                       <span id="batteryCapacity">0 Ah </span><span class="badge badge-warning" id="batteryVoltage">0V</span>
                     </h1>
                   </div>
-                </div> -->
+                </div>
               </div>
               <button type="button" class="btn btn-success btn-block btn-lg font-weight-bold" id="calculateButton">
                 <div class="d-flex align-items-center justify-content-center">
