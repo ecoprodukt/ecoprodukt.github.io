@@ -1,5 +1,10 @@
-const addButton = document.getElementById('addButton');
-const applianceSelect = document.getElementsByClassName('applianceSelect')[0];
+//Panel specs
+
+//panelName{
+//   wattage [W]
+//   Imppt [A]
+//   Voc [V]
+// }
 
 const panels = {
   victron30Wp: {
@@ -34,11 +39,14 @@ const panels = {
   },
 };
 
+//Appliance specs
+
+//pair -> name : power [W]
+
 const appliances = {
   'mixér': 500,
   'kávovar': 1000,
   'umývačka riadu': 1500,
-  'mraznička': 150,
   'chladnička - menšia': 60,
   'chladnička - väčšia': 150,
   'kanvica': 1200,
@@ -55,6 +63,15 @@ const appliances = {
   'sušička': 3000,
   'práčka': 1000,
   'žehlička': 1200,
+  'žiarovka 40W - klasická': 40,
+  'žiarovka 60W - klasická': 60,
+  'žiarovka 100W - klasická': 100,
+  'LED žiarovka - 40W ekvivalent': 10,
+  'LED žiarovka - 60W ekvivalent': 13,
+  'LED žiarovka - 100W ekvivalent': 23,
+  'CFL žiarovka - 40W ekvivalent': 11,
+  'CFL žiarovka - 60W ekvivalent': 18,
+  'CFL žiarovka - 100W ekvivalent': 30,
   'televízor - plazma': 200,
   'televízor - LCD': 150,
   'televízor - LED': 100,
@@ -65,6 +82,20 @@ const appliances = {
   'mobilný telefón - klasický': 18,
   'mobilný telefón - výkonný': 30,
 };
+
+//Loading DOM elements (used multiple times)
+
+const addButton = document.getElementById('addButton');
+const applianceSelect = document.getElementsByClassName('applianceSelect')[0];
+
+const whPerDayTotalField = document.getElementById('whPerDayTotal');
+const whPerDayRequiredField = document.getElementById('whPerDayRequired');
+const kwhPerMonthField = document.getElementById('kwhPerMonth');
+const locationInput = document.getElementById('location');
+const angleRange = document.getElementById('angleRange');
+const calculateButton = document.getElementById('calculateButton');
+
+// UI and input-handling part
 
 for (const appliance in appliances) {
   if (appliances.hasOwnProperty(appliance)) {
@@ -88,10 +119,6 @@ const checkForNegativeValues = () => {
 checkForNegativeValues();
 
 const updateTotalConsumptionFields = (stage) => {
-  const whPerDayTotalField = document.getElementById('whPerDayTotal');
-  const whPerDayRequiredField = document.getElementById('whPerDayRequired');
-  const kwhPerMonthField = document.getElementById('kwhPerMonth');
-
   if (stage === 'applianceStage') {
     const consumptionFields = [...document.getElementsByClassName('consumption')];
     const consumptionValues = consumptionFields.slice(1).map((field) => parseInt(field.value));
@@ -125,7 +152,12 @@ const updateFields = (inputFields) => {
     inputFields.power.value = 0;
   }
 
-  inputFields.usage.value = 1;
+  if (appliance.includes('chladnička')) {
+    inputFields.usage.value = 8;
+  } else {
+    inputFields.usage.value = 1;
+  }
+
   inputFields.consumption.value = (
     parseFloat(inputFields.power.value) *
     parseFloat(inputFields.quantity.value) *
@@ -196,27 +228,22 @@ addRow();
 
 addButton.addEventListener('click', addRow);
 
-const angleRange = document.getElementById('angleRange');
-
 angleRange.addEventListener('input', (event) => {
   const angleOutput = document.getElementById('angleOutput');
   angleOutput.innerHTML = `${event.target.value}°`;
 });
 
-const whPerDayTotalField = document.getElementById('whPerDayTotal');
-
 whPerDayTotalField.addEventListener('change', (event) => {
   updateTotalConsumptionFields('dailyConsumptionStage');
 });
-
-const kwhPerMonthField = document.getElementById('kwhPerMonth');
 
 kwhPerMonthField.addEventListener('change', (event) => {
   updateTotalConsumptionFields('monthlyConsumptionStage');
 });
 
+//location part
+
 const initAutocomplete = () => {
-  const locationInput = document.getElementById('location');
   new google.maps.places.Autocomplete(locationInput);
 };
 
@@ -235,6 +262,8 @@ const getLatLong = (address) => {
     });
   });
 };
+
+//Calculation part
 
 const findNearestWattage = (requiredWattage) => {
   let closest;
@@ -288,7 +317,7 @@ const calculateBatteryParameters = (panelConf, weekUsage, dailyConsumption) => {
     voltage = 12;
   } else if (panelConf.quantity > 1 && panelConf.quantity < 5) {
     voltage = 24;
-  } else if (panelConf.quantity > 5) {
+  } else if (panelConf.quantity >= 5) {
     voltage = 48;
   }
 
@@ -309,16 +338,13 @@ const calculateBatteryParameters = (panelConf, weekUsage, dailyConsumption) => {
       };
 };
 
-const calculateButton = document.getElementById('calculateButton');
-
 calculateButton.addEventListener('click', (event) => {
-  const location = document.getElementById('location');
   const panelOrientation = document.getElementById('orientation').value;
-  const panelAngle = document.getElementById('angleRange').value;
+  const panelAngle = parseInt(angleRange.value);
 
-  if (location.value) {
-    if (location.classList.contains('is-invalid')) {
-      location.classList.remove('is-invalid');
+  if (locationInput.value) {
+    if (locationInput.classList.contains('is-invalid')) {
+      locationInput.classList.remove('is-invalid');
     }
 
     const spinner = document.getElementById('spinner');
@@ -326,7 +352,7 @@ calculateButton.addEventListener('click', (event) => {
 
     // const country = document.getElementById('countrySelect').value;
 
-    getLatLong(`${location.value}`).then((geolocation) => {
+    getLatLong(`${locationInput.value}`).then((geolocation) => {
       const corsUrl = 'https://cors-anywhere.herokuapp.com/';
       const jrcApiUrl = 'https://re.jrc.ec.europa.eu/api/PVcalc';
       const apiParameters = `?outputformat=json&loss=14&peakpower=1&lat=${geolocation[0]}&lon=${geolocation[1]}&angle=${panelAngle}&aspect=${panelOrientation}`;
@@ -345,10 +371,8 @@ calculateButton.addEventListener('click', (event) => {
           const weekUsage = document.querySelector('input[name="weekUsage"]:checked').value;
           const yearUsage = document.querySelector('input[name="yearUsage"]:checked').value;
 
-          const whPerDayRequired = parseInt(
-            document.getElementById('whPerDayRequired').textContent
-          );
-          const kwhPerMonth = parseFloat(document.getElementById('kwhPerMonth').value);
+          const whPerDayRequired = parseInt(whPerDayRequiredField.textContent);
+          const kwhPerMonth = parseFloat(kwhPerMonthField.value);
 
           let systemSize;
 
@@ -386,6 +410,6 @@ calculateButton.addEventListener('click', (event) => {
         });
     });
   } else {
-    location.classList.add('is-invalid');
+    locationInput.classList.add('is-invalid');
   }
 });

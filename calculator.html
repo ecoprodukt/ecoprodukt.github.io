@@ -12,8 +12,14 @@
     <div class="container p-0 shadow">
         <form action="#">
 
-            <div class="p-3">
+          <div class="p-3">
+            <h1 class="text-center">Kalkulačka na off-grid solárny systém</h1>
+            <p class="text-center">*Vypočítané údaje sú orientačné</p>
+          </div>
+
+            <div class="p-3 bg-light">
               <h4>1. Využitie solárneho systému</h4>
+              <p>Zadajte spôsob plánovaného využitia solárneho systému</p>
               <div class="form-group custom-control custom-radio">
                 <input type="radio" class="custom-control-input" name="weekUsage" id="weekendRadio" value="weekend">
                 <label class="custom-control-label" for="weekendRadio">Cez víkend</label>
@@ -24,8 +30,9 @@
               </div>
             </div>
 
-            <div class="p-3 bg-light">
+            <div class="p-3">
               <h4>2. Potreba elektrickej energie</h4>
+              <p>Zadajte obdobie, v ktorom plánujete solárny systém využívať</p>
               <div class="form-group custom-control custom-radio">
                 <input type="radio" class="custom-control-input" name="yearUsage" id="summerRadio" value="summer" checked>
                 <label class="custom-control-label" for="summerRadio">Jar-leto</label>
@@ -36,16 +43,18 @@
               </div>
             </div>
 
-            <div class="p-3">
+            <div class="p-3 bg-light">
               <h4>3. Približná lokalita / adresa</h4>
+              <p>Zadajte približnú polohu solárneho systému (povinný údaj)</p>
               <div class="form-group">
                 <label for="location">Lokalita:</label>
                 <input type="text" class="form-control" placeholder="napr. Bojnice" id="location">
               </div>
             </div>
             
-            <div class="p-3 bg-light">
+            <div class="p-3">
               <h4>4. Orientácia a sklon panela</h4>
+              <p>Zadajte približnú orientáciu solárnych panelov a sklon povrchu, na ktorom budú upevnené</p>
               <div class="row">
                 <div class="col-lg-6 form-group">
                   <label>Orientácia panela:</label>
@@ -65,8 +74,9 @@
               </div>
             </div>
 
-            <div class="p-3">
+            <div class="p-3 bg-light">
               <h4>5. Typ akumulátora</h4>
+              <p>Zadajte typ akumulátrovej technológie, ktorú plánujete použiť</p>
               <div class="form-group custom-control custom-radio">
                 <input type="radio" class="custom-control-input" name="batteryType" id="leadAcidRadio" value="lead-acid" checked>
                 <label class="custom-control-label" for="leadAcidRadio">Olovený akumulátor</label>
@@ -77,8 +87,9 @@
               </div>
             </div>
           
-            <div id="appliances" class="p-3 bg-light">
+            <div id="appliances" class="p-3">
               <h4>6. Spotrebiče</h4>
+              <p>Uveďte spotrebiče, ktoré plánujete napájať zo solárneho systému</p>
               <div class="row d-none d-lg-flex text-center">
                 <div class="col-lg-3">
                   <label>Spotrebič:</label>
@@ -148,8 +159,9 @@
               <button type="button" id="addButton" class="btn btn-outline-info btn-md btn-block font-weight-bold ">Pridať spotrebič</button>
             </div>
 
-            <div class="p-3">
+            <div class="p-3 bg-light">
               <h4>7. Spotreba</h4>
+              <p>Zadajte dennú, resp. mesačnú spotrebu zariadení, ktoré plánujete napájať (možno tak preskočiť krok 6)</p>
               <div class="row">
                 <div class="col-lg-4 text-center form-group">
                   <label>Denná spotreba</label>
@@ -176,8 +188,9 @@
               </div>
             </div>
 
-            <div class="p-3 bg-light">
+            <div class="p-3">
               <h4>8. Výpočet potrebného systému</h4>
+              <p>Po zadaní všetkých potrebných údajov kliknite na tlačidlo 'Vypočítať'</p>
               <div class="card-group form-group text-light font-weight-bold d-none text-center" id="results">
                 <div class="card bg-primary">
                   <div class="card-header">Potrebný výkon</div>
