@@ -1,1 +1,1 @@
-# Solar_System_Calculator
+# Off-Grid Solar System Calculator
