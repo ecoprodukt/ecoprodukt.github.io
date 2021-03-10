@@ -353,7 +353,7 @@ calculateButton.addEventListener('click', (event) => {
     // const country = document.getElementById('countrySelect').value;
 
     getLatLong(`${locationInput.value}`).then((geolocation) => {
-      const corsUrl = 'https://cors-anywhere.herokuapp.com/';
+      const corsUrl = 'https://secret-ocean-49799.herokuapp.com/';
       const jrcApiUrl = 'https://re.jrc.ec.europa.eu/api/PVcalc';
       const apiParameters = `?outputformat=json&loss=14&peakpower=1&lat=${geolocation[0]}&lon=${geolocation[1]}&angle=${panelAngle}&aspect=${panelOrientation}`;
 
