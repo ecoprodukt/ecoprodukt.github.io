@@ -1,3 +1,26 @@
+//Monthly energy output from fix-angle 1kWp PV system
+//Location: Jesenskeho 35, Bojnice, Slovakia
+//Angle: 35 deg
+//Orientation: South
+
+//pair -> month : energy output [kWh]
+
+const energyOutput = {
+  'January': 41.93,
+  'February': 62.86,
+  'March': 97.86,
+  'April': 126.32,
+  'May': 129.26,
+  'June': 131.07,
+  'July': 137.81,
+  'August': 130.53,
+  'September': 108.41,
+  'October': 84.74,
+  'Movember': 48.85,
+  'December': 40.2
+};
+
+
 //Appliance specs
 
 //pair -> name : power [W]
@@ -50,7 +73,6 @@ const applianceSelect = document.getElementsByClassName('applianceSelect')[0];
 const whPerDayTotalField = document.getElementById('whPerDayTotal');
 const whPerDayRequiredField = document.getElementById('whPerDayRequired');
 const kwhPerMonthField = document.getElementById('kwhPerMonth');
-const angleRange = document.getElementById('angleRange');
 const calculateButton = document.getElementById('calculateButton');
 
 // UI and input-handling part
@@ -186,11 +208,6 @@ addRow();
 
 addButton.addEventListener('click', addRow);
 
-angleRange.addEventListener('input', (event) => {
-  const angleOutput = document.getElementById('angleOutput');
-  angleOutput.innerHTML = `${event.target.value}°`;
-});
-
 whPerDayTotalField.addEventListener('input', (event) => {
   updateTotalConsumptionFields('dailyConsumptionStage');
 });
@@ -201,97 +218,85 @@ kwhPerMonthField.addEventListener('input', (event) => {
 
 //Calculation part
 
-const calculateBatteryParameters = (requiredPVPower, weekUsage, dailyConsumption) => {
+const calculateBatteryParameters = (requiredPVPower, weekUsage, yearUsage, dailyConsumption) => {
   const LEAD_ACID_DOD_FACTOR = 2.0;
   const LEAD_ACID_INEFFICIENCY = 1.2;
 
   const LITHIUM_DOD_FACTOR = 1.2;
   const LITHIUM_INEFFICIENCY = 1.05;
 
-  let voltage, batteryType;
+  let capacity, voltage, batteryType;
+  let capacityLimit = 20000;
 
   if (requiredPVPower <= 400) {
     voltage = 12;
-    batteryType = 'lead-acid';
+    batteryType = 'Pb';
+    capacityLimit = 3000;
   } else if (requiredPVPower > 400 && requiredPVPower <= 1200) {
     voltage = 24;
-    batteryType = 'lead-acid';
+    batteryType = 'Pb';
+    capacityLimit = 6000;
   } else if (requiredPVPower > 1200) {
     voltage = 48;
-    batteryType = 'lithium';
+    batteryType = 'Li';
   }
-
-  let capacity;
-
-  //calculate capacity with 1 day reserve
+  //calculate capacity with ~1 day reserve, within the limits
   capacity =
-    batteryType === 'lead-acid'
-      ? Math.ceil((dailyConsumption * LEAD_ACID_DOD_FACTOR * LEAD_ACID_INEFFICIENCY) / voltage)
-      : Math.ceil((dailyConsumption * LITHIUM_DOD_FACTOR * LITHIUM_INEFFICIENCY) / voltage);
+    batteryType === 'Pb'
+      ? (dailyConsumption * LEAD_ACID_DOD_FACTOR * LEAD_ACID_INEFFICIENCY)
+      : (dailyConsumption * LITHIUM_DOD_FACTOR * LITHIUM_INEFFICIENCY);
 
-  // capacity = weekUsage === 'week' ? capacity : capacity * 2;
+  capacity = ((yearUsage === 'winter') || (weekUsage === 'weekend')) ? (capacity * 1.25) : capacity;
+  
+  if (capacity > capacityLimit) {
+    capacity = capacityLimit;
+  }
+  capacity = Math.ceil(capacity/voltage);
 
-  return { capacity: capacity, voltage: voltage };
+  return { capacity: capacity, voltage: voltage, type: batteryType };
 };
 
 calculateButton.addEventListener('click', (event) => {
-  const panelOrientation = document.getElementById('orientation').value;
-  const panelAngle = parseInt(angleRange.value);
-  const geolocation = ['48.782', '18.591']; //jesenskeho 35, bojnice
-
-  const spinner = document.getElementById('spinner');
-
-  const corsUrl = 'https://cors-anywhere.herokuapp.com/';
-  const jrcApiUrl = 'https://re.jrc.ec.europa.eu/api/v5_2/PVcalc';
-  const apiParameters = `?outputformat=json&loss=14&peakpower=1&lat=${geolocation[0]}&lon=${geolocation[1]}&angle=${panelAngle}&aspect=${panelOrientation}`;
 
   if (whPerDayTotalField.value !== '0') {
     if (whPerDayTotalField.classList.contains('is-invalid')) {
       whPerDayTotalField.classList.remove('is-invalid');
     }
     
-    spinner.classList.remove('d-none');
-    fetch(corsUrl + jrcApiUrl + apiParameters)
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        const minimumSystemSize = document.getElementById('minimumSystemSize');
-        const batteryCapacity = document.getElementById('batteryCapacity');
-        const batteryVoltage = document.getElementById('batteryVoltage');
+    const minimumSystemSize = document.getElementById('minimumSystemSize');
+    const batteryCapacity = document.getElementById('batteryCapacity');
+    const batteryVoltage = document.getElementById('batteryVoltage');
 
-        const weekUsage = document.querySelector('input[name="weekUsage"]:checked').value;
-        const yearUsage = document.querySelector('input[name="yearUsage"]:checked').value;
+    const weekUsage = document.querySelector('input[name="weekUsage"]:checked').value;
+    const yearUsage = document.querySelector('input[name="yearUsage"]:checked').value;
 
-        const whPerDayRequired = parseInt(whPerDayRequiredField.textContent);
-        const kwhPerMonth = parseFloat(kwhPerMonthField.value);
+    const whPerDayRequired = parseInt(whPerDayRequiredField.textContent);
+    const kwhPerMonth = parseFloat(kwhPerMonthField.value);
 
-        let systemSize;
+    let systemSize;
 
-        const month = yearUsage === 'winter' ? 11 : 9;
+    const month = yearUsage === 'winter' ? 'January' : 'September';
 
-        systemSize = Math.ceil((kwhPerMonth / data.outputs.monthly.fixed[month].E_m) * 1000);
+    systemSize = Math.ceil((kwhPerMonth / energyOutput[month]) * 1000);
 
-        if (weekUsage === 'weekend') {
-          systemSize = Math.ceil((systemSize /= 3));
-        }
+    const batteryConfiguration = calculateBatteryParameters(
+      systemSize,
+      weekUsage,
+      yearUsage,
+      whPerDayRequired
+    );
 
-        const batteryConfiguration = calculateBatteryParameters(
-          systemSize,
-          weekUsage,
-          whPerDayRequired
-        );
+    if (weekUsage === 'weekend') {
+      systemSize = Math.ceil((systemSize *= 0.75));
+    }
 
-        minimumSystemSize.innerHTML = `${systemSize} Wp`;
+    minimumSystemSize.innerHTML = `${systemSize} Wp`;
 
-        batteryCapacity.innerHTML = `${batteryConfiguration.capacity} Ah `;
-        batteryVoltage.innerHTML = `${batteryConfiguration.voltage}V`;
+    batteryCapacity.innerHTML = `${batteryConfiguration.capacity} Ah `;
+    batteryVoltage.innerHTML = `${batteryConfiguration.voltage}V ${batteryConfiguration.type}`;
 
-        spinner.classList.add('d-none');
-
-        const resultsArea = document.getElementById('results');
-        resultsArea.classList.remove('d-none');
-      });
+    const resultsArea = document.getElementById('results');
+    resultsArea.classList.remove('d-none');
   } else {
     whPerDayTotalField.classList.add('is-invalid');
   }

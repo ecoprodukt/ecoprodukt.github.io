@@ -18,55 +18,35 @@
 
             <div class="p-3 bg-light">
               <h4>1. Využitie solárneho systému</h4>
-              <p>Zadajte spôsob plánovaného využitia solárneho systému</p>
-              <div class="form-group custom-control custom-radio">
-                <input type="radio" class="custom-control-input" name="weekUsage" id="weekendRadio" value="weekend">
-                <label class="custom-control-label" for="weekendRadio">Cez víkend</label>
-              </div>
-              <div class="form-group custom-control custom-radio">
-                <input type="radio" class="custom-control-input" name="weekUsage" id="weekRadio" value="week" checked>
-                <label class="custom-control-label" for="weekRadio">Celý týždeň</label>
+              <div class="row">
+                <div class="col-lg">
+                  <p>Vyberte plánované využitie počas týždňa</p>
+                  <div class="form-group custom-control custom-radio">
+                    <input type="radio" class="custom-control-input" name="weekUsage" id="weekendRadio" value="weekend">
+                    <label class="custom-control-label" for="weekendRadio">Cez víkend</label>
+                  </div>
+                  <div class="form-group custom-control custom-radio">
+                    <input type="radio" class="custom-control-input" name="weekUsage" id="weekRadio" value="week" checked>
+                    <label class="custom-control-label" for="weekRadio">Celý týždeň</label>
+                  </div>
+                </div>
+                <div class="col-lg">
+                  <p>Vyberte plánované využitie počas roka</p>
+                  <div class="form-group custom-control custom-radio">
+                    <input type="radio" class="custom-control-input" name="yearUsage" id="summerRadio" value="summer" checked>
+                    <label class="custom-control-label" for="summerRadio">Jar-leto</label>
+                  </div>
+                  <div class="form-group custom-control custom-radio">
+                    <input type="radio" class="custom-control-input" name="yearUsage" id="winterRadio" value="winter">
+                    <label class="custom-control-label" for="winterRadio">Celoročne</label>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="p-3">
-              <h4>2. Potreba elektrickej energie</h4>
-              <p>Zadajte obdobie, v ktorom plánujete solárny systém využívať</p>
-              <div class="form-group custom-control custom-radio">
-                <input type="radio" class="custom-control-input" name="yearUsage" id="summerRadio" value="summer" checked>
-                <label class="custom-control-label" for="summerRadio">Jar-leto</label>
-              </div>
-              <div class="form-group custom-control custom-radio">
-                <input type="radio" class="custom-control-input" name="yearUsage" id="winterRadio" value="winter">
-                <label class="custom-control-label" for="winterRadio">Celoročne</label>
-              </div>
-            </div>
-            
-            <div class="p-3 bg-light">
-              <h4>3. Orientácia a sklon panela</h4>
-              <p>Zadajte približnú orientáciu solárnych panelov a sklon povrchu, na ktorom budú upevnené</p>
-              <div class="row">
-                <div class="col-lg-6 form-group">
-                  <label>Orientácia panela:</label>
-                  <select id="orientation" class="custom-select">
-                    <option value="-90">Východ</option>
-                    <option value="-45">Juhovýchod</option>
-                    <option value="0" selected>Juh</option>
-                    <option value="45">Juhozápad</option>
-                    <option value="90">Západ</option>
-                  </select>
-                </div>
-                <div class="col-lg-6 form-group">
-                  <label for="angleRange">Sklon panela:</label>
-                  <input type="range" min="0" max="50" value="35" class="custom-range" id="angleRange">
-                  <h6 class="text-center" id="angleOutput">35°</h6>
-                </div>
-              </div>
-            </div>
-          
             <div id="appliances" class="p-3">
-              <h4>4. Spotrebiče</h4>
-              <p>Uveďte spotrebiče, ktoré plánujete napájať zo solárneho systému</p>
+              <h4>2. Spotrebiče</h4>
+              <p>Uveďte spotrebiče, ktoré plánujete napájať zo solárneho systému (alebo preskočte na krok 3)</p>
               <div class="row d-none d-lg-flex text-center">
                 <div class="col-lg-3">
                   <label>Spotrebič:</label>
@@ -137,8 +117,8 @@
             </div>
 
             <div class="p-3 bg-light">
-              <h4>5. Spotreba</h4>
-              <p>Zadajte dennú, resp. mesačnú spotrebu zariadení, ktoré plánujete napájať (možno tak preskočiť krok 4)</p>
+              <h4>3. Spotreba</h4>
+              <p>Zadajte dennú, resp. mesačnú spotrebu zariadení, ktoré plánujete napájať (možno tak preskočiť krok 2)</p>
               <div class="row">
                 <div class="col-lg-4 text-center form-group">
                   <label>Denná spotreba</label>
@@ -166,7 +146,7 @@
             </div>
 
             <div class="p-3">
-              <h4>6. Výpočet potrebného systému</h4>
+              <h4>4. Výpočet potrebného systému</h4>
               <p>Po zadaní všetkých potrebných údajov kliknite na tlačidlo 'Vypočítať'</p>
               <div class="card-group form-group text-light font-weight-bold d-none text-center" id="results">
                 <div class="card bg-primary">
@@ -188,7 +168,6 @@
               <button type="button" class="btn btn-success btn-block btn-lg font-weight-bold" id="calculateButton">
                 <div class="d-flex align-items-center justify-content-center">
                   <span>Vypočítať&nbsp;</span>
-                  <span id="spinner" class="spinner-border spinner-border-sm d-none"></span>
                 </div>
               </button>
             </div>
